@@ -184,7 +184,7 @@
 <body>
 
 <header class="header">
-  <a class="back-btn" id="back-btn" href="index.html">‹ Back</a>
+  <a class="back-btn" id="back-btn" href="index.html" onclick="if(history.length>1){event.preventDefault();history.back()}">‹ Back</a>
   <div class="header-text">
     <div class="header-title" id="header-title">Loading…</div>
     <div class="header-author" id="header-author"></div>
@@ -224,12 +224,6 @@
 const STORAGE_KEY = 'panorama_v1';
 const params = new URLSearchParams(location.search);
 const poemId = params.get('id');
-const fromStudy = document.referrer.includes('study.html');
-
-if (fromStudy) {
-  document.getElementById('back-btn').href = 'javascript:history.back()';
-  document.getElementById('back-btn').textContent = '‹ Study';
-}
 
 function loadProgress() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Poems — panorama.ink</title>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#F7A900">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F5F7;
+      --surface: #FFFFFF;
+      --text: #1D1D1F;
+      --text-secondary: #6E6E73;
+      --accent: #007AFF;
+      --border: #D2D2D7;
+      --green: #30D158;
+      --yellow: #FF9F0A;
+      --radius: 16px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(245,245,247,0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px 10px;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .back-btn {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 17px;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .header-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      flex: 1;
+    }
+
+    .poem-count {
+      font-size: 13px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    /* ── Search ── */
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      color: var(--text-secondary);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 36px 10px 38px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      -webkit-appearance: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .search-input::placeholder { color: var(--text-secondary); }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--border);
+      border: none;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 11px;
+      color: white;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .search-clear.visible { display: flex; }
+
+    /* ── Filter tabs ── */
+    .filter-row {
+      display: flex;
+      gap: 6px;
+      padding: 10px 16px 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .filter-row::-webkit-scrollbar { display: none; }
+
+    .filter-tab {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: none;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      background: var(--surface);
+      color: var(--text-secondary);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .filter-tab.active { background: var(--accent); color: white; }
+
+    /* ── Poem list ── */
+    .list-container {
+      padding: 12px 16px 40px;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    .poem-list {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .poem-item {
+      display: flex;
+      align-items: center;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--bg);
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.1s;
+    }
+
+    .poem-item:last-child { border-bottom: none; }
+    .poem-item:active { background: var(--bg); }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-dot.new      { background: var(--border); }
+    .status-dot.learning { background: var(--yellow); }
+    .status-dot.known    { background: var(--green); }
+
+    .poem-info { flex: 1; min-width: 0; }
+
+    .poem-title {
+      font-size: 15px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .poem-author {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+
+    .poem-match {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-style: italic;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .study-link {
+      font-size: 13px;
+      color: var(--accent);
+      text-decoration: none;
+      padding: 6px 4px 6px 8px;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    mark {
+      background: #FFF176;
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-top">
+    <a class="back-btn" href="index.html" onclick="if(history.length>1){event.preventDefault();history.back()}">‹ Back</a>
+    <div class="header-title">All Poems</div>
+    <div class="poem-count" id="poem-count"></div>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" id="search-input" type="search" placeholder="Search poems, authors, or lines…" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+  </div>
+</header>
+
+<div class="filter-row" id="filter-row">
+  <button class="filter-tab active" data-filter="all">All</button>
+  <button class="filter-tab" data-filter="new">New</button>
+  <button class="filter-tab" data-filter="learning">Learning</button>
+  <button class="filter-tab" data-filter="known">Known</button>
+</div>
+
+<div class="list-container">
+  <div id="poem-list"></div>
+</div>
+
+<script>
+const COUPLET_KEY = 'panorama_couplets_v1';
+
+let poems = [];
+let activeFilter = 'all';
+let query = '';
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(COUPLET_KEY)) || {}; } catch { return {}; }
+}
+
+function getPoemStatus(progress, poem) {
+  // A poem is "known" if more than half its couplets are known
+  // "learning" if any couplet is learning
+  // "new" otherwise
+  const keys = Object.keys(progress).filter(k => k.startsWith(poem.id + '-c'));
+  if (!keys.length) return 'new';
+  const known = keys.filter(k => progress[k].status === 'known').length;
+  const learning = keys.filter(k => progress[k].status === 'learning').length;
+  if (learning > 0) return 'learning';
+  if (known > 0) return 'learning'; // started but not done
+  return 'new';
+}
+
+function getPoemStatusFull(progress, poem, totalCouplets) {
+  const keys = Object.keys(progress).filter(k => k.startsWith(poem.id + '-c'));
+  if (!keys.length) return 'new';
+  const known = keys.filter(k => progress[k].status === 'known').length;
+  const learning = keys.filter(k => progress[k].status === 'learning').length;
+  if (known >= totalCouplets * 0.8) return 'known';
+  if (learning > 0 || known > 0) return 'learning';
+  return 'new';
+}
+
+async function init() {
+  const [poemsData, coupletsData] = await Promise.all([
+    fetch('poems.json').then(r => r.json()),
+    fetch('couplets.json').then(r => r.json())
+  ]);
+  poems = poemsData;
+
+  // Count couplets per poem
+  const coupletCount = {};
+  coupletsData.forEach(c => { coupletCount[c.poemId] = (coupletCount[c.poemId] || 0) + 1; });
+
+  const progress = loadProgress();
+
+  // Attach derived status to each poem
+  poems = poems.map(p => ({
+    ...p,
+    status: getPoemStatusFull(progress, p, coupletCount[p.id] || 1)
+  }));
+
+  document.getElementById('poem-count').textContent = poems.length + ' poems';
+  render();
+
+  // Filter tabs
+  document.getElementById('filter-row').addEventListener('click', e => {
+    const tab = e.target.closest('.filter-tab');
+    if (!tab) return;
+    activeFilter = tab.dataset.filter;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    render();
+  });
+
+  // Search
+  const input = document.getElementById('search-input');
+  const clearBtn = document.getElementById('search-clear');
+
+  input.addEventListener('input', () => {
+    query = input.value.trim().toLowerCase();
+    clearBtn.classList.toggle('visible', query.length > 0);
+    render();
+  });
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  query = '';
+  document.getElementById('search-clear').classList.remove('visible');
+  render();
+}
+
+function render() {
+  let list = poems;
+
+  // Status filter
+  if (activeFilter !== 'all') {
+    list = list.filter(p => p.status === activeFilter);
+  }
+
+  // Search filter
+  let matchLines = {};
+  if (query) {
+    list = list.filter(p => {
+      const titleHit = p.title.toLowerCase().includes(query);
+      const authorHit = p.author.toLowerCase().includes(query);
+      const textHit = p.text.toLowerCase().includes(query);
+      if (textHit && !titleHit) {
+        const line = p.text.split('\n').find(l => l.toLowerCase().includes(query));
+        if (line) matchLines[p.id] = line.trim();
+      }
+      return titleHit || authorHit || textHit;
+    });
+  }
+
+  const container = document.getElementById('poem-list');
+  document.getElementById('poem-count').textContent = list.length + ' poem' + (list.length !== 1 ? 's' : '');
+
+  if (!list.length) {
+    container.innerHTML = `<div class="no-results">No poems found</div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="poem-list">${list.map(p => {
+    const match = matchLines[p.id];
+    return `
+      <a class="poem-item" href="poem.html?id=${enc(p.id)}">
+        <div class="status-dot ${p.status}"></div>
+        <div class="poem-info">
+          <div class="poem-title">${query ? highlight(esc(p.title), query) : esc(p.title)}</div>
+          ${match
+            ? `<div class="poem-match">"${highlight(esc(match), query)}"</div>`
+            : `<div class="poem-author">${esc(p.author)}</div>`}
+        </div>
+        <a class="study-link" href="study.html?poem=${enc(p.id)}" onclick="event.stopPropagation()" title="Study couplets">Study</a>
+      </a>
+    `;
+  }).join('')}</div>`;
+}
+
+function highlight(html, q) {
+  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  return html.replace(re, m => `<mark>${m}</mark>`);
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function enc(s) { return encodeURIComponent(s); }
+
+init();
+</script>
+
+</body>
+</html>

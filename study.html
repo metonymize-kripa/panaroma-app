@@ -328,7 +328,7 @@
 <body>
 
 <header class="header">
-  <a href="index.html" class="back-btn">‹ Back</a>
+  <a href="index.html" class="back-btn" onclick="if(history.length>1){event.preventDefault();history.back()}">‹ Back</a>
   <div class="header-center">
     <div class="header-title" id="h-title">Loading…</div>
     <div class="header-sub" id="h-sub"></div>
