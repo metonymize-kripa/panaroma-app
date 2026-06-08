@@ -13,439 +13,618 @@
       --text: #1D1D1F;
       --text-secondary: #6E6E73;
       --accent: #007AFF;
-      --accent-soft: #E8F1FF;
-      --green: #30D158;
-      --yellow: #FF9F0A;
-      --red: #FF453A;
       --border: #D2D2D7;
-      --radius: 16px;
-      --shadow: 0 2px 16px rgba(0,0,0,0.08);
+      --green: #30D158;
+      --radius: 18px;
+      --shadow: 0 2px 20px rgba(0,0,0,0.08);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
+      min-height: 100dvh;
       -webkit-font-smoothing: antialiased;
     }
 
+    /* ── Header ── */
     .header {
-      background: rgba(245,245,247,0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      padding: 16px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 18px 20px 14px;
     }
 
-    .header h1 {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: -0.4px;
-    }
-
-    .header-right {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .container {
-      max-width: 680px;
-      margin: 0 auto;
-      padding: 32px 20px 80px;
-    }
-
-    /* Hero stats */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-
-    .stat-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 20px 16px;
-      box-shadow: var(--shadow);
-      text-align: center;
-    }
-
-    .stat-number {
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: -1px;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .stat-label {
-      font-size: 11px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-secondary);
-    }
-
-    .stat-card.new .stat-number { color: var(--text-secondary); }
-    .stat-card.learning .stat-number { color: var(--yellow); }
-    .stat-card.known .stat-number { color: var(--green); }
-
-    /* Progress bar */
-    .progress-section {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 20px 20px;
-      box-shadow: var(--shadow);
-      margin-bottom: 20px;
-    }
-
-    .progress-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 12px;
-    }
-
-    .progress-header h2 {
-      font-size: 15px;
-      font-weight: 600;
-    }
-
-    .progress-pct {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .progress-bar {
-      height: 8px;
-      background: var(--bg);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), #5AC8FA);
-      border-radius: 4px;
-      transition: width 0.6s ease;
-    }
-
-    /* CTA buttons */
-    .cta-section {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-
-    .btn-primary {
-      display: block;
-      width: 100%;
-      padding: 17px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: var(--radius);
+    .header-title {
       font-size: 17px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-      transition: opacity 0.15s, transform 0.1s;
-      -webkit-tap-highlight-color: transparent;
+      font-weight: 700;
+      letter-spacing: -0.3px;
     }
 
-    .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
-    .btn-primary.disabled { opacity: 0.35; pointer-events: none; }
-
-    .btn-secondary {
-      display: block;
-      width: 100%;
-      padding: 15px;
-      background: var(--surface);
-      color: var(--accent);
-      border: none;
-      border-radius: var(--radius);
-      font-size: 15px;
+    .progress-pill {
+      font-size: 12px;
       font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      text-align: center;
+      color: var(--text-secondary);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 11px;
       text-decoration: none;
-      box-shadow: var(--shadow);
-      transition: opacity 0.15s;
+      color: inherit;
       -webkit-tap-highlight-color: transparent;
     }
 
-    .btn-secondary:active { opacity: 0.7; }
+    .progress-pill span {
+      color: var(--green);
+      font-weight: 600;
+    }
 
-    /* Section label */
-    .section-label {
-      font-size: 13px;
+    /* ── Featured couplet card ── */
+    .hero {
+      padding: 0 16px 4px;
+    }
+
+    .couplet-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 36px 28px 28px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      position: relative;
+      transition: box-shadow 0.2s;
+    }
+
+    .couplet-card:active {
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+    }
+
+    .couplet-tag {
+      font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.8px;
       color: var(--text-secondary);
-      margin-bottom: 10px;
-      padding-left: 4px;
+      margin-bottom: 18px;
     }
 
-    /* Poem list */
-    .poem-list {
+    .couplet-line1 {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 22px;
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .couplet-line2 {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 22px;
+      line-height: 1.5;
+      color: var(--text);
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      margin-bottom: 6px;
+    }
+
+    .couplet-line2.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .tap-prompt {
+      font-size: 13px;
+      color: var(--border);
+      margin-top: 20px;
+      transition: opacity 0.2s;
+    }
+
+    .tap-prompt.hidden { opacity: 0; }
+
+    .couplet-footer {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+    }
+
+    .couplet-footer.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .couplet-byline {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .couplet-byline em {
+      font-style: italic;
+    }
+
+    .couplet-read-link {
+      font-size: 13px;
+      color: var(--accent);
+      text-decoration: none;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .refresh-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--border);
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: color 0.15s, transform 0.3s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .refresh-btn:active { color: var(--accent); transform: rotate(180deg); }
+
+    /* ── Search ── */
+    .search-section {
+      padding: 20px 16px 4px;
+    }
+
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      color: var(--text-secondary);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 12px 12px 40px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+    }
+
+    .search-input::placeholder { color: var(--text-secondary); }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+    }
+
+    /* ── Search results ── */
+    .search-results {
+      display: none;
       background: var(--surface);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
+      margin-top: 8px;
       overflow: hidden;
     }
 
-    .poem-item {
+    .search-results.visible { display: block; }
+
+    .search-result-item {
       display: flex;
       align-items: center;
-      padding: 14px 16px;
+      padding: 13px 16px;
       border-bottom: 1px solid var(--bg);
       text-decoration: none;
       color: inherit;
-      gap: 12px;
-      transition: background 0.1s;
+      gap: 10px;
       -webkit-tap-highlight-color: transparent;
+      transition: background 0.1s;
     }
 
-    .poem-item:last-child { border-bottom: none; }
-    .poem-item:active { background: var(--bg); }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:active { background: var(--bg); }
 
-    .poem-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      background: var(--border);
-    }
+    .result-info { flex: 1; min-width: 0; }
 
-    .poem-dot.new { background: var(--border); }
-    .poem-dot.learning { background: var(--yellow); }
-    .poem-dot.known { background: var(--green); }
-
-    .poem-info { flex: 1; min-width: 0; }
-
-    .poem-title {
+    .result-title {
       font-size: 15px;
       font-weight: 500;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-bottom: 2px;
     }
 
-    .poem-author {
+    .result-match {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-style: italic;
+    }
+
+    .result-author {
       font-size: 12px;
       color: var(--text-secondary);
     }
 
-    .poem-chevron {
-      color: var(--border);
+    .no-results {
+      padding: 20px;
+      text-align: center;
+      color: var(--text-secondary);
       font-size: 14px;
     }
 
-    /* Filter tabs */
-    .filter-tabs {
+    /* ── CTA ── */
+    .cta-section {
+      padding: 20px 16px 8px;
       display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      flex-direction: column;
+      gap: 10px;
     }
-    .filter-tabs::-webkit-scrollbar { display: none; }
 
-    .filter-tab {
-      padding: 6px 14px;
-      border-radius: 20px;
+    .btn-study {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      background: var(--accent);
+      color: white;
       border: none;
-      font-size: 13px;
-      font-weight: 500;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 600;
       font-family: inherit;
       cursor: pointer;
-      white-space: nowrap;
-      background: var(--surface);
-      color: var(--text-secondary);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      transition: all 0.15s;
+      text-decoration: none;
+      transition: opacity 0.15s;
       -webkit-tap-highlight-color: transparent;
     }
 
-    .filter-tab.active {
-      background: var(--accent);
-      color: white;
+    .btn-study:active { opacity: 0.85; }
+    .btn-study.muted { background: var(--surface); color: var(--text-secondary); box-shadow: var(--shadow); font-size: 15px; font-weight: 500; }
+
+    .due-chip {
+      background: rgba(255,255,255,0.25);
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-size: 13px;
+      font-weight: 600;
     }
 
-    .due-badge {
-      display: inline-block;
-      background: var(--red);
-      color: white;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 6px;
+    .btn-browse {
+      display: block;
+      padding: 14px;
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      box-shadow: var(--shadow);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Stats row (discreet) ── */
+    .stats-row {
+      display: flex;
+      gap: 6px;
+      padding: 0 16px 4px;
+    }
+
+    .stat-chip {
+      flex: 1;
+      background: var(--surface);
       border-radius: 10px;
-      margin-left: 6px;
-      vertical-align: middle;
+      padding: 10px 8px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    .stat-chip-num {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .stat-chip-label {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: var(--text-secondary);
+    }
+
+    .stat-chip.known .stat-chip-num { color: var(--green); }
+    .stat-chip.learning .stat-chip-num { color: #FF9F0A; }
+    .stat-chip.new .stat-chip-num { color: var(--text-secondary); }
+
+    /* ── Footer attribution ── */
+    .attribution {
+      padding: 24px 20px 40px;
+      text-align: center;
+    }
+
+    .attribution p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .attribution a {
+      color: var(--accent);
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
 
 <header class="header">
-  <h1>Panorama</h1>
-  <span class="header-right" id="total-count"></span>
+  <div class="header-title">Panorama</div>
+  <a class="progress-pill" href="study.html?mode=all" id="progress-pill">— / — known</a>
 </header>
 
-<div class="container">
-
-  <div class="stats-row">
-    <div class="stat-card new">
-      <div class="stat-number" id="stat-new">—</div>
-      <div class="stat-label">New</div>
-    </div>
-    <div class="stat-card learning">
-      <div class="stat-number" id="stat-learning">—</div>
-      <div class="stat-label">Learning</div>
-    </div>
-    <div class="stat-card known">
-      <div class="stat-number" id="stat-known">—</div>
-      <div class="stat-label">Known</div>
+<!-- Featured couplet -->
+<div class="hero">
+  <div class="couplet-card" id="couplet-card" onclick="handleCardTap(event)">
+    <button class="refresh-btn" id="refresh-btn" onclick="event.stopPropagation(); pickCouplet(true)" title="New couplet">↺</button>
+    <div class="couplet-tag" id="couplet-tag">Daily verse</div>
+    <div class="couplet-line1" id="couplet-line1">…</div>
+    <div class="couplet-line2" id="couplet-line2"></div>
+    <div class="tap-prompt" id="tap-prompt">tap to continue</div>
+    <div class="couplet-footer" id="couplet-footer">
+      <div class="couplet-byline" id="couplet-byline"></div>
+      <a class="couplet-read-link" id="couplet-read-link" href="#" onclick="event.stopPropagation()">read poem ↗</a>
     </div>
   </div>
+</div>
 
-  <div class="progress-section">
-    <div class="progress-header">
-      <h2>Overall progress</h2>
-      <span class="progress-pct" id="progress-pct">0%</span>
-    </div>
-    <div class="progress-bar">
-      <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
-    </div>
+<!-- Stats chips -->
+<div class="stats-row" id="stats-row" style="margin-top:14px">
+  <div class="stat-chip new">
+    <div class="stat-chip-num" id="stat-new">—</div>
+    <div class="stat-chip-label">New</div>
   </div>
-
-  <div class="cta-section">
-    <a href="study.html" class="btn-primary" id="btn-study">Study due cards <span class="due-badge" id="due-count" style="display:none"></span></a>
-    <a href="study.html?mode=all" class="btn-secondary">Browse all poems</a>
+  <div class="stat-chip learning">
+    <div class="stat-chip-num" id="stat-learning">—</div>
+    <div class="stat-chip-label">Learning</div>
   </div>
-
-  <div class="section-label">All poems</div>
-
-  <div class="filter-tabs" id="filter-tabs">
-    <button class="filter-tab active" data-filter="all">All</button>
-    <button class="filter-tab" data-filter="new">New</button>
-    <button class="filter-tab" data-filter="learning">Learning</button>
-    <button class="filter-tab" data-filter="known">Known</button>
+  <div class="stat-chip known">
+    <div class="stat-chip-num" id="stat-known">—</div>
+    <div class="stat-chip-label">Known</div>
   </div>
+</div>
 
-  <div class="poem-list" id="poem-list"></div>
+<!-- Search -->
+<div class="search-section">
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" id="search-input" type="search" placeholder="Search poems or lines…" autocomplete="off" autocorrect="off" spellcheck="false">
+  </div>
+  <div class="search-results" id="search-results"></div>
+</div>
 
+<!-- CTAs -->
+<div class="cta-section">
+  <a href="study.html" class="btn-study" id="btn-study">
+    Study due couplets
+    <span class="due-chip" id="due-chip" style="display:none">0</span>
+  </a>
+  <a href="study.html?mode=all" class="btn-browse">Browse all poems</a>
+</div>
+
+<!-- Attribution -->
+<div class="attribution">
+  <p>
+    This app is a personal study aid for<br>
+    <em>Panorama: A Collection of Poems</em> (Oxford University Press).<br>
+    <a href="https://india.oup.com/product/panorama-revised-edition-9780195620313/" target="_blank">→ Buy the book</a> — highly recommended for your shelf.
+  </p>
 </div>
 
 <script>
-const STORAGE_KEY = 'panorama_v1';
+const COUPLET_KEY = 'panorama_couplets_v1';
+const POEM_KEY = 'panorama_v1';
 
-function loadProgress() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch { return {}; }
+let couplets = [];
+let poems = [];
+let featuredCouplet = null;
+let revealed = false;
+
+function loadCoupletProgress() {
+  try { return JSON.parse(localStorage.getItem(COUPLET_KEY)) || {}; } catch { return {}; }
 }
 
 function getStatus(progress, id) {
-  const card = progress[id];
-  if (!card) return 'new';
-  return card.status || 'new';
+  return (progress[id] && progress[id].status) || 'new';
 }
 
 function isDue(progress, id) {
-  const card = progress[id];
-  if (!card || card.status === 'new') return true;
-  if (card.status === 'known') return (Date.now() >= (card.nextReview || 0));
-  return true; // learning cards always due
+  const c = progress[id];
+  if (!c || c.status === 'new') return true;
+  if (c.status === 'learning') return true;
+  if (c.status === 'known') return Date.now() >= (c.nextReview || 0);
+  return true;
 }
 
-let poems = [];
-let activeFilter = 'all';
+function pickCouplet(forceNew) {
+  if (!couplets.length) return;
+  const progress = loadCoupletProgress();
+
+  // Priority: learning > new > known
+  const learning = couplets.filter(c => getStatus(progress, c.id) === 'learning');
+  const newCards  = couplets.filter(c => getStatus(progress, c.id) === 'new');
+  const pool = learning.length ? learning : newCards.length ? newCards : couplets;
+
+  // Pick random from pool, avoiding the current one unless nothing else
+  let pick;
+  const filtered = pool.filter(c => !featuredCouplet || c.id !== featuredCouplet.id);
+  pick = (filtered.length ? filtered : pool)[Math.floor(Math.random() * (filtered.length || pool.length))];
+
+  featuredCouplet = pick;
+  revealed = false;
+
+  document.getElementById('couplet-line1').textContent = pick.line1;
+  document.getElementById('couplet-line2').textContent = pick.line2;
+  document.getElementById('couplet-line2').classList.remove('revealed');
+  document.getElementById('couplet-footer').classList.remove('revealed');
+  document.getElementById('tap-prompt').classList.remove('hidden');
+
+  const tag = getStatus(progress, pick.id);
+  document.getElementById('couplet-tag').textContent =
+    tag === 'known' ? 'Review' :
+    tag === 'learning' ? 'Still learning' :
+    'Daily verse';
+
+  document.getElementById('couplet-byline').innerHTML =
+    `<em>${escHtml(pick.poemTitle)}</em> &mdash; ${escHtml(pick.author)}`;
+  document.getElementById('couplet-read-link').href = `poem.html?id=${encodeURIComponent(pick.poemId)}`;
+}
+
+function handleCardTap(e) {
+  if (revealed) return;
+  revealed = true;
+  document.getElementById('couplet-line2').classList.add('revealed');
+  document.getElementById('couplet-footer').classList.add('revealed');
+  document.getElementById('tap-prompt').classList.add('hidden');
+}
 
 async function init() {
-  const res = await fetch('poems.json');
-  poems = await res.json();
-  const progress = loadProgress();
+  const [c, p] = await Promise.all([
+    fetch('couplets.json').then(r => r.json()),
+    fetch('poems.json').then(r => r.json())
+  ]);
+  couplets = c;
+  poems = p;
+
+  const progress = loadCoupletProgress();
 
   const counts = { new: 0, learning: 0, known: 0 };
   let due = 0;
-
-  poems.forEach(p => {
-    const s = getStatus(progress, p.id);
+  couplets.forEach(c => {
+    const s = getStatus(progress, c.id);
     counts[s]++;
-    if (isDue(progress, p.id)) due++;
+    if (isDue(progress, c.id)) due++;
   });
 
   document.getElementById('stat-new').textContent = counts.new;
   document.getElementById('stat-learning').textContent = counts.learning;
   document.getElementById('stat-known').textContent = counts.known;
-  document.getElementById('total-count').textContent = poems.length + ' poems';
 
-  const knownPct = Math.round((counts.known / poems.length) * 100);
-  document.getElementById('progress-pct').textContent = knownPct + '%';
-  document.getElementById('progress-fill').style.width = knownPct + '%';
+  // Header pill — show poem-level known count
+  const poemProgress = (() => { try { return JSON.parse(localStorage.getItem(POEM_KEY)) || {}; } catch { return {}; }})();
+  const poemsKnown = poems.filter(p => poemProgress[p.id] && poemProgress[p.id].status === 'known').length;
+  const pill = document.getElementById('progress-pill');
+  pill.innerHTML = `<span>${poemsKnown}</span> / ${poems.length}`;
 
+  // Due chip
   if (due > 0) {
-    const badge = document.getElementById('due-count');
-    badge.textContent = due;
-    badge.style.display = 'inline-block';
-    document.getElementById('btn-study').href = 'study.html';
+    const chip = document.getElementById('due-chip');
+    chip.textContent = due.toLocaleString();
+    chip.style.display = '';
   } else {
     document.getElementById('btn-study').textContent = 'All caught up ✓';
-    document.getElementById('btn-study').classList.add('disabled');
+    document.getElementById('btn-study').classList.add('muted');
+    document.getElementById('btn-study').style.pointerEvents = 'none';
   }
 
-  renderList(progress, activeFilter);
+  pickCouplet();
+  initSearch();
+}
 
-  document.getElementById('filter-tabs').addEventListener('click', e => {
-    const tab = e.target.closest('.filter-tab');
-    if (!tab) return;
-    activeFilter = tab.dataset.filter;
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    renderList(progress, activeFilter);
+function initSearch() {
+  const input = document.getElementById('search-input');
+  const results = document.getElementById('search-results');
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) {
+      results.classList.remove('visible');
+      return;
+    }
+
+    const hits = [];
+    for (const poem of poems) {
+      const titleMatch = poem.title.toLowerCase().includes(q);
+      const authorMatch = poem.author.toLowerCase().includes(q);
+      const lineMatch = poem.text.toLowerCase().includes(q);
+
+      if (titleMatch || authorMatch || lineMatch) {
+        // Find matching line if it's a text match
+        let matchLine = '';
+        if (lineMatch && !titleMatch) {
+          const lines = poem.text.split('\n');
+          const ml = lines.find(l => l.toLowerCase().includes(q));
+          if (ml) matchLine = ml.trim();
+        }
+        hits.push({ poem, matchLine });
+        if (hits.length >= 8) break;
+      }
+    }
+
+    if (!hits.length) {
+      results.innerHTML = `<div class="no-results">No poems found</div>`;
+    } else {
+      results.innerHTML = hits.map(({ poem, matchLine }) => `
+        <a class="search-result-item" href="poem.html?id=${encodeURIComponent(poem.id)}">
+          <div class="result-info">
+            <div class="result-title">${highlightMatch(escHtml(poem.title), q)}</div>
+            ${matchLine
+              ? `<div class="result-match">"${highlightMatch(escHtml(matchLine), q)}"</div>`
+              : `<div class="result-author">${escHtml(poem.author)}</div>`}
+          </div>
+          <span style="color:var(--border)">›</span>
+        </a>
+      `).join('');
+    }
+
+    results.classList.add('visible');
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      input.value = '';
+      results.classList.remove('visible');
+    }
+  });
+
+  // Hide results on outside click
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-section')) {
+      results.classList.remove('visible');
+    }
   });
 }
 
-function renderList(progress, filter) {
-  const list = document.getElementById('poem-list');
-  const filtered = poems.filter(p => {
-    if (filter === 'all') return true;
-    return getStatus(progress, p.id) === filter;
-  });
-
-  if (filtered.length === 0) {
-    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-secondary);font-size:15px;">No poems in this category yet.</div>';
-    return;
-  }
-
-  list.innerHTML = filtered.map(p => {
-    const status = getStatus(progress, p.id);
-    return `
-      <a class="poem-item" href="poem.html?id=${encodeURIComponent(p.id)}">
-        <div class="poem-dot ${status}"></div>
-        <div class="poem-info">
-          <div class="poem-title">${escHtml(p.title)}</div>
-          <div class="poem-author">${escHtml(p.author)}</div>
-        </div>
-        <span class="poem-chevron">›</span>
-      </a>
-    `;
-  }).join('');
+function highlightMatch(html, q) {
+  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  return html.replace(re, m => `<mark style="background:#FFF176;border-radius:2px">${m}</mark>`);
 }
 
 function escHtml(s) {
