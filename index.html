@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panorama</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F5F7;
+      --surface: #FFFFFF;
+      --text: #1D1D1F;
+      --text-secondary: #6E6E73;
+      --accent: #007AFF;
+      --accent-soft: #E8F1FF;
+      --green: #30D158;
+      --yellow: #FF9F0A;
+      --red: #FF453A;
+      --border: #D2D2D7;
+      --radius: 16px;
+      --shadow: 0 2px 16px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .header {
+      background: rgba(245,245,247,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+    }
+
+    .header-right {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+
+    /* Hero stats */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+    }
+
+    .stat-card.new .stat-number { color: var(--text-secondary); }
+    .stat-card.learning .stat-number { color: var(--yellow); }
+    .stat-card.known .stat-number { color: var(--green); }
+
+    /* Progress bar */
+    .progress-section {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 20px 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .progress-header h2 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .progress-pct {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #5AC8FA);
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    /* CTA buttons */
+    .cta-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .btn-primary {
+      display: block;
+      width: 100%;
+      padding: 17px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 17px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: opacity 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+    .btn-primary.disabled { opacity: 0.35; pointer-events: none; }
+
+    .btn-secondary {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      background: var(--surface);
+      color: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      box-shadow: var(--shadow);
+      transition: opacity 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-secondary:active { opacity: 0.7; }
+
+    /* Section label */
+    .section-label {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+      padding-left: 4px;
+    }
+
+    /* Poem list */
+    .poem-list {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .poem-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--bg);
+      text-decoration: none;
+      color: inherit;
+      gap: 12px;
+      transition: background 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .poem-item:last-child { border-bottom: none; }
+    .poem-item:active { background: var(--bg); }
+
+    .poem-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--border);
+    }
+
+    .poem-dot.new { background: var(--border); }
+    .poem-dot.learning { background: var(--yellow); }
+    .poem-dot.known { background: var(--green); }
+
+    .poem-info { flex: 1; min-width: 0; }
+
+    .poem-title {
+      font-size: 15px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .poem-author {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .poem-chevron {
+      color: var(--border);
+      font-size: 14px;
+    }
+
+    /* Filter tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+
+    .filter-tab {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: none;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      background: var(--surface);
+      color: var(--text-secondary);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .filter-tab.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .due-badge {
+      display: inline-block;
+      background: var(--red);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Panorama</h1>
+  <span class="header-right" id="total-count"></span>
+</header>
+
+<div class="container">
+
+  <div class="stats-row">
+    <div class="stat-card new">
+      <div class="stat-number" id="stat-new">—</div>
+      <div class="stat-label">New</div>
+    </div>
+    <div class="stat-card learning">
+      <div class="stat-number" id="stat-learning">—</div>
+      <div class="stat-label">Learning</div>
+    </div>
+    <div class="stat-card known">
+      <div class="stat-number" id="stat-known">—</div>
+      <div class="stat-label">Known</div>
+    </div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-header">
+      <h2>Overall progress</h2>
+      <span class="progress-pct" id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="cta-section">
+    <a href="study.html" class="btn-primary" id="btn-study">Study due cards <span class="due-badge" id="due-count" style="display:none"></span></a>
+    <a href="study.html?mode=all" class="btn-secondary">Browse all poems</a>
+  </div>
+
+  <div class="section-label">All poems</div>
+
+  <div class="filter-tabs" id="filter-tabs">
+    <button class="filter-tab active" data-filter="all">All</button>
+    <button class="filter-tab" data-filter="new">New</button>
+    <button class="filter-tab" data-filter="learning">Learning</button>
+    <button class="filter-tab" data-filter="known">Known</button>
+  </div>
+
+  <div class="poem-list" id="poem-list"></div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'panorama_v1';
+
+function loadProgress() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch { return {}; }
+}
+
+function getStatus(progress, id) {
+  const card = progress[id];
+  if (!card) return 'new';
+  return card.status || 'new';
+}
+
+function isDue(progress, id) {
+  const card = progress[id];
+  if (!card || card.status === 'new') return true;
+  if (card.status === 'known') return (Date.now() >= (card.nextReview || 0));
+  return true; // learning cards always due
+}
+
+let poems = [];
+let activeFilter = 'all';
+
+async function init() {
+  const res = await fetch('poems.json');
+  poems = await res.json();
+  const progress = loadProgress();
+
+  const counts = { new: 0, learning: 0, known: 0 };
+  let due = 0;
+
+  poems.forEach(p => {
+    const s = getStatus(progress, p.id);
+    counts[s]++;
+    if (isDue(progress, p.id)) due++;
+  });
+
+  document.getElementById('stat-new').textContent = counts.new;
+  document.getElementById('stat-learning').textContent = counts.learning;
+  document.getElementById('stat-known').textContent = counts.known;
+  document.getElementById('total-count').textContent = poems.length + ' poems';
+
+  const knownPct = Math.round((counts.known / poems.length) * 100);
+  document.getElementById('progress-pct').textContent = knownPct + '%';
+  document.getElementById('progress-fill').style.width = knownPct + '%';
+
+  if (due > 0) {
+    const badge = document.getElementById('due-count');
+    badge.textContent = due;
+    badge.style.display = 'inline-block';
+    document.getElementById('btn-study').href = 'study.html';
+  } else {
+    document.getElementById('btn-study').textContent = 'All caught up ✓';
+    document.getElementById('btn-study').classList.add('disabled');
+  }
+
+  renderList(progress, activeFilter);
+
+  document.getElementById('filter-tabs').addEventListener('click', e => {
+    const tab = e.target.closest('.filter-tab');
+    if (!tab) return;
+    activeFilter = tab.dataset.filter;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    renderList(progress, activeFilter);
+  });
+}
+
+function renderList(progress, filter) {
+  const list = document.getElementById('poem-list');
+  const filtered = poems.filter(p => {
+    if (filter === 'all') return true;
+    return getStatus(progress, p.id) === filter;
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-secondary);font-size:15px;">No poems in this category yet.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(p => {
+    const status = getStatus(progress, p.id);
+    return `
+      <a class="poem-item" href="poem.html?id=${encodeURIComponent(p.id)}">
+        <div class="poem-dot ${status}"></div>
+        <div class="poem-info">
+          <div class="poem-title">${escHtml(p.title)}</div>
+          <div class="poem-author">${escHtml(p.author)}</div>
+        </div>
+        <span class="poem-chevron">›</span>
+      </a>
+    `;
+  }).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+init();
+</script>
+
+</body>
+</html>

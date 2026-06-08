@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poem — Panorama</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F5F7;
+      --surface: #FFFFFF;
+      --text: #1D1D1F;
+      --text-secondary: #6E6E73;
+      --accent: #007AFF;
+      --border: #D2D2D7;
+      --radius: 16px;
+      --shadow: 0 2px 16px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .header {
+      background: rgba(245,245,247,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-btn {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 17px;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .header-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-author {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+
+    .poem-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .poem-header {
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid var(--bg);
+    }
+
+    .poem-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .poem-author {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .poem-body {
+      padding: 24px 28px 32px;
+    }
+
+    .poem-text {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 17px;
+      line-height: 1.85;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    /* Status pill */
+    .status-section {
+      margin-top: 20px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .status-info {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .status-pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status-pill.new     { background: #EBEBEB; color: var(--text-secondary); }
+    .status-pill.learning { background: #FFF4E0; color: #B25000; }
+    .status-pill.known   { background: #E3F9EC; color: #1A7F3C; }
+
+    .study-btn {
+      display: block;
+      margin-top: 16px;
+      width: 100%;
+      padding: 15px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: opacity 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .study-btn:active { opacity: 0.85; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <a class="back-btn" id="back-btn" href="index.html">‹ Back</a>
+  <div class="header-text">
+    <div class="header-title" id="header-title">Loading…</div>
+    <div class="header-author" id="header-author"></div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="poem-card">
+    <div class="poem-header">
+      <div class="poem-title" id="poem-title">Loading…</div>
+      <div class="poem-author" id="poem-author"></div>
+    </div>
+    <div class="poem-body">
+      <div class="poem-text" id="poem-text"></div>
+    </div>
+  </div>
+
+  <div class="status-section">
+    <div class="status-info" id="status-info">Loading…</div>
+    <div class="status-pill" id="status-pill">—</div>
+  </div>
+
+  <a href="study.html" class="study-btn" id="study-btn">Study this poem</a>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'panorama_v1';
+const params = new URLSearchParams(location.search);
+const poemId = params.get('id');
+const fromStudy = document.referrer.includes('study.html');
+
+if (fromStudy) {
+  document.getElementById('back-btn').href = 'javascript:history.back()';
+  document.getElementById('back-btn').textContent = '‹ Study';
+}
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+}
+
+async function init() {
+  const res = await fetch('poems.json');
+  const poems = await res.json();
+  const poem = poems.find(p => p.id === poemId);
+
+  if (!poem) {
+    document.getElementById('poem-title').textContent = 'Poem not found';
+    return;
+  }
+
+  document.title = poem.title + ' — Panorama';
+  document.getElementById('header-title').textContent = poem.title;
+  document.getElementById('header-author').textContent = poem.author;
+  document.getElementById('poem-title').textContent = poem.title;
+  document.getElementById('poem-author').textContent = poem.author;
+  document.getElementById('poem-text').textContent = poem.text;
+
+  // Status
+  const progress = loadProgress();
+  const card = progress[poem.id];
+  const status = card ? card.status : 'new';
+  const reviews = card ? (card.reviews || 0) : 0;
+
+  const pill = document.getElementById('status-pill');
+  pill.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+  pill.className = 'status-pill ' + status;
+
+  const info = document.getElementById('status-info');
+  if (status === 'new') {
+    info.textContent = 'You haven\'t studied this poem yet.';
+  } else if (status === 'learning') {
+    info.textContent = `Reviewed ${reviews} time${reviews !== 1 ? 's' : ''}.`;
+  } else {
+    const next = new Date(card.nextReview);
+    const daysUntil = Math.ceil((card.nextReview - Date.now()) / 86400000);
+    const nextStr = daysUntil <= 0 ? 'today' :
+                    daysUntil === 1 ? 'tomorrow' :
+                    `in ${daysUntil} days`;
+    info.textContent = `Reviewed ${reviews} time${reviews !== 1 ? 's' : ''}. Due ${nextStr}.`;
+  }
+
+  document.getElementById('study-btn').href = `study.html?poem=${encodeURIComponent(poem.id)}`;
+}
+
+init();
+</script>
+
+</body>
+</html>
