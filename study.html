@@ -89,59 +89,118 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 20px;
       overflow: hidden;
     }
 
-    /* Card container */
-    .card-wrap {
+    /* Study view — fills the main area */
+    #study-view {
       width: 100%;
-      max-width: 560px;
-      perspective: 1200px;
-      flex-shrink: 0;
+      max-width: 600px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
-    .card {
-      width: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .card.flipped {
-      transform: rotateY(180deg);
-    }
-
-    .card-face {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-
-    .card-front {
-      padding: 48px 32px;
+    /* ── FRONT PANEL ── */
+    #front-panel {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 28px 20px;
       text-align: center;
-      min-height: 260px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .card-back {
-      position: absolute;
-      top: 0;
-      left: 0;
+    .front-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 48px 32px 36px;
       width: 100%;
-      transform: rotateY(180deg);
-      max-height: 70vh;
       display: flex;
       flex-direction: column;
+      align-items: center;
+    }
+
+    .poem-number {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 20px;
+    }
+
+    .front-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .front-author {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .first-line-btn {
+      background: var(--bg);
+      border: none;
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .first-line-btn:active { background: var(--border); }
+
+    .first-line-preview {
+      font-family: "Georgia", serif;
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-style: italic;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .tap-hint {
+      font-size: 13px;
+      color: var(--border);
+      margin-top: 20px;
+    }
+
+    /* ── BACK PANEL ── */
+    #back-panel {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #back-panel.visible {
+      display: flex;
+    }
+
+    .back-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin: 16px 16px 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
     }
 
     .card-back-header {
@@ -164,102 +223,41 @@
     .poem-text-wrap {
       flex: 1;
       overflow-y: auto;
-      padding: 16px 24px 20px;
+      padding: 16px 24px 16px;
       -webkit-overflow-scrolling: touch;
+      min-height: 0;
     }
 
     .poem-text {
       font-family: "Georgia", "Times New Roman", serif;
       font-size: 15px;
-      line-height: 1.75;
+      line-height: 1.8;
       color: var(--text);
       white-space: pre-wrap;
     }
 
     .card-back-footer {
-      padding: 12px 24px 16px;
+      padding: 10px 24px 14px;
       border-top: 1px solid var(--bg);
       flex-shrink: 0;
     }
 
     .full-poem-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
       font-size: 13px;
       color: var(--accent);
       text-decoration: none;
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Front card content */
-    .poem-number {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 20px;
-    }
-
-    .front-title {
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      line-height: 1.2;
-      margin-bottom: 10px;
-    }
-
-    .front-author {
-      font-size: 16px;
-      color: var(--text-secondary);
-      margin-bottom: 28px;
-    }
-
-    .tap-hint {
-      font-size: 13px;
-      color: var(--border);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .first-line-btn {
-      background: var(--bg);
-      border: none;
-      border-radius: 10px;
-      padding: 8px 16px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      font-family: inherit;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: background 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .first-line-btn:active { background: var(--border); }
-
-    .first-line-preview {
-      font-family: "Georgia", serif;
-      font-size: 14px;
-      color: var(--text-secondary);
-      font-style: italic;
-      margin-top: 12px;
-      display: none;
-    }
-
-    /* Rating buttons */
+    /* ── RATING BUTTONS ── */
     .rating-area {
-      width: 100%;
-      max-width: 560px;
-      margin-top: 20px;
+      padding: 14px 16px 20px;
       flex-shrink: 0;
     }
 
     .rating-label {
       text-align: center;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-secondary);
       font-weight: 500;
       text-transform: uppercase;
@@ -298,10 +296,6 @@
       margin-top: 2px;
       opacity: 0.7;
     }
-
-    /* Hidden state */
-    .rating-area { display: none; }
-    .rating-area.visible { display: block; }
 
     /* Done screen */
     .done-screen {
@@ -393,55 +387,42 @@
 <div class="main" id="main">
 
   <!-- Study view -->
-  <div id="study-view" style="width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:0">
+  <div id="study-view">
 
-    <div class="card-wrap">
-      <div class="card" id="card" onclick="flipCard()">
-
-        <div class="card-face card-front" id="card-front">
-          <div class="poem-number" id="front-number"></div>
-          <div class="front-title" id="front-title"></div>
-          <div class="front-author" id="front-author"></div>
-          <button class="first-line-btn" id="hint-btn" onclick="event.stopPropagation(); showHint()">Show first line</button>
-          <div class="first-line-preview" id="first-line-preview"></div>
-          <div class="tap-hint" id="tap-hint" style="margin-top:20px">
-            <span>Tap to reveal</span>
-          </div>
-        </div>
-
-        <div class="card-face card-back" id="card-back">
-          <div class="card-back-header">
-            <div class="card-back-title" id="back-title"></div>
-            <div class="card-back-author" id="back-author"></div>
-          </div>
-          <div class="poem-text-wrap">
-            <div class="poem-text" id="poem-text"></div>
-          </div>
-          <div class="card-back-footer">
-            <a class="full-poem-link" id="full-poem-link" href="#" target="_blank">
-              ↗ Read full poem
-            </a>
-          </div>
-        </div>
-
+    <!-- FRONT: title + author -->
+    <div id="front-panel" onclick="flipCard()">
+      <div class="front-card">
+        <div class="poem-number" id="front-number"></div>
+        <div class="front-title" id="front-title"></div>
+        <div class="front-author" id="front-author"></div>
+        <button class="first-line-btn" id="hint-btn" onclick="event.stopPropagation(); showHint()">Show first line</button>
+        <div class="first-line-preview" id="first-line-preview"></div>
+        <div class="tap-hint">Tap to reveal</div>
       </div>
     </div>
 
-    <div class="rating-area" id="rating-area">
-      <div class="rating-label">How well did you know it?</div>
-      <div class="rating-buttons">
-        <button class="rate-btn again" onclick="rate('again')">
-          Again
-          <span class="btn-sub">Show soon</span>
-        </button>
-        <button class="rate-btn hard" onclick="rate('hard')">
-          Hard
-          <span class="btn-sub">Tomorrow</span>
-        </button>
-        <button class="rate-btn good" onclick="rate('good')">
-          Got it
-          <span class="btn-sub">3+ days</span>
-        </button>
+    <!-- BACK: poem text + rating -->
+    <div id="back-panel">
+      <div class="back-card">
+        <div class="card-back-header">
+          <div class="card-back-title" id="back-title"></div>
+          <div class="card-back-author" id="back-author"></div>
+        </div>
+        <div class="poem-text-wrap">
+          <div class="poem-text" id="poem-text"></div>
+        </div>
+        <div class="card-back-footer">
+          <a class="full-poem-link" id="full-poem-link" href="#" target="_blank">↗ Read full poem</a>
+        </div>
+      </div>
+
+      <div class="rating-area">
+        <div class="rating-label">How well did you know it?</div>
+        <div class="rating-buttons">
+          <button class="rate-btn again" onclick="rate('again')">Again<span class="btn-sub">Show soon</span></button>
+          <button class="rate-btn hard"  onclick="rate('hard')">Hard<span class="btn-sub">Tomorrow</span></button>
+          <button class="rate-btn good"  onclick="rate('good')">Got it<span class="btn-sub">3+ days</span></button>
+        </div>
       </div>
     </div>
 
@@ -560,10 +541,10 @@ function showCard() {
   document.getElementById('header-subtitle').textContent =
     `${reviewedCount + 1} of ${totalEst}`;
 
-  // Reset card
+  // Reset to front panel
   flipped = false;
-  const card = document.getElementById('card');
-  card.classList.remove('flipped');
+  document.getElementById('front-panel').style.display = '';
+  document.getElementById('back-panel').classList.remove('visible');
 
   document.getElementById('front-number').textContent =
     getStatus(poem.id) === 'new' ? 'New poem' :
@@ -580,19 +561,14 @@ function showCard() {
   document.getElementById('first-line-preview').style.display = 'none';
   document.getElementById('hint-btn').style.display = 'inline-block';
 
-  // Scroll poem text to top
-  document.querySelector('.poem-text-wrap').scrollTop = 0;
-
-  document.getElementById('rating-area').classList.remove('visible');
-  document.getElementById('tap-hint').style.opacity = '1';
 }
 
 function flipCard() {
   if (flipped) return;
   flipped = true;
-  document.getElementById('card').classList.add('flipped');
-  document.getElementById('rating-area').classList.add('visible');
-  document.getElementById('tap-hint').style.opacity = '0';
+  document.getElementById('front-panel').style.display = 'none';
+  document.getElementById('back-panel').classList.add('visible');
+  document.querySelector('.poem-text-wrap').scrollTop = 0;
 }
 
 function showHint() {
