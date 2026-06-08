@@ -445,6 +445,7 @@
 const STORAGE_KEY = 'panorama_v1';
 const params = new URLSearchParams(location.search);
 const browseAll = params.get('mode') === 'all';
+const specificPoem = params.get('poem');
 
 let poems = [];
 let queue = [];
@@ -493,23 +494,27 @@ async function init() {
   poems = await res.json();
   progress = loadProgress();
 
-  if (browseAll) {
+  if (specificPoem) {
+    // Single-poem mode: study just this poem
+    const target = poems.find(p => p.id === specificPoem);
+    queue = target ? [target] : [];
+    document.getElementById('header-title').textContent = target ? target.title : 'Not found';
+  } else if (browseAll) {
     queue = [...poems];
+    document.getElementById('header-title').textContent = 'Browse all';
   } else {
     queue = poems.filter(p => isDue(p.id));
-    // Sort: new first, then learning, then due known
     queue.sort((a, b) => {
       const order = { new: 0, learning: 1, known: 2 };
       return (order[getStatus(a.id)] || 0) - (order[getStatus(b.id)] || 0);
     });
+    document.getElementById('header-title').textContent = 'Due today';
   }
 
   if (queue.length === 0) {
     showDone();
     return;
   }
-
-  document.getElementById('header-title').textContent = browseAll ? 'Browse all' : 'Due today';
   showCard();
 }
 
