@@ -3,7 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Poem — Panorama</title>
+  <title>Poem — panorama.ink</title>
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#F7A900">
+
+  <!-- OG tags — populated by JS once poem loads -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="panorama.ink">
+  <meta property="og:image" content="https://panorama.ink/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://panorama.ink/twitter-card.png">
+  <meta id="og-title" property="og:title" content="panorama.ink">
+  <meta id="og-desc" property="og:description" content="A study companion for poems">
+  <meta id="og-url" property="og:url" content="https://panorama.ink/">
+  <meta id="tw-title" name="twitter:title" content="panorama.ink">
+  <meta id="tw-desc" name="twitter:description" content="A study companion for poems">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -224,7 +245,17 @@ async function init() {
     return;
   }
 
-  document.title = poem.title + ' — Panorama';
+  document.title = poem.title + ' — panorama.ink';
+
+  // Dynamic OG tags for poem share previews
+  const firstLine = poem.text.split('\n').find(l => l.trim()) || '';
+  const desc = `"${firstLine}" — ${poem.author}`;
+  const url = `https://panorama.ink/poem.html?id=${encodeURIComponent(poem.id)}`;
+  document.getElementById('og-title').content = poem.title + ' — panorama.ink';
+  document.getElementById('og-desc').content = desc;
+  document.getElementById('og-url').content = url;
+  document.getElementById('tw-title').content = poem.title + ' — panorama.ink';
+  document.getElementById('tw-desc').content = desc;
   document.getElementById('header-title').textContent = poem.title;
   document.getElementById('header-author').textContent = poem.author;
   document.getElementById('poem-title').textContent = poem.title;
