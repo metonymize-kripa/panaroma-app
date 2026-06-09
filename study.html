@@ -201,23 +201,16 @@
       font-size: 18px;
       line-height: 1.65;
       color: var(--text);
+      margin-bottom: 8px; /* breathing room before divider / answer */
     }
 
-    /* Extra top margin only when context is present */
-    .card-context.has-content + .card-line1 {
-      /* no extra margin — flows as natural next line */
+    /* In block mode the prompt flows directly from context — remove extra gap */
+    .card.block-mode .card-line1 {
+      margin-bottom: 0;
     }
 
-    /* Spacer between context block and prompt in block mode */
-    .card-prompt-spacer {
-      display: none;
-      height: 0;
-    }
-
-    .card-prompt-spacer.visible {
-      display: block;
-      height: 0.85em; /* one blank line = stanza break before prompt */
-    }
+    /* Spacer between context block and prompt — unused now, kept for future */
+    .card-prompt-spacer { display: none; }
 
     /* ── Answer line ── */
     .card-line2 {
@@ -579,17 +572,19 @@ function computeNext(id, rating) {
 }
 
 // ── Block mode: stanza context ─────────────────
-// Returns up to 4 preceding poem lines for context.
-// Uses coupletIndex * 2 to locate lines in the poem.
+// Returns lines from the start of the current stanza up to (not including) the prompt line.
+// Assumes 4-line stanzas (2 pairs each). This prevents context bleeding across stanza boundaries
+// since poems.json has no \n\n separators.
 function getBlockContext(couplet) {
   const lines = poems[couplet.poemId];
   if (!lines) return [];
 
-  const promptLineIdx = couplet.coupletIndex * 2; // line1 is at this index in the poem
-  if (promptLineIdx === 0) return [];             // no preceding lines
+  const promptLineIdx = couplet.coupletIndex * 2;
+  // Stanza start: every 2 pairs = 4 lines
+  const stanzaStart = Math.floor(couplet.coupletIndex / 2) * 4;
 
-  const start = Math.max(0, promptLineIdx - 4);
-  return lines.slice(start, promptLineIdx);       // up to 4 lines before line1
+  if (promptLineIdx === stanzaStart) return []; // first pair in stanza — no preceding context
+  return lines.slice(stanzaStart, promptLineIdx);
 }
 
 // ── Rendering ─────────────────────────────────
@@ -616,8 +611,11 @@ function renderCard() {
   document.getElementById('card-line1').textContent = promptLine;
 
   // Context (block mode only)
+  const cardEl    = document.getElementById('card');
   const ctxEl     = document.getElementById('card-context');
   const spacerEl  = document.getElementById('card-prompt-spacer');
+
+  cardEl.classList.toggle('block-mode', studyMode === 'block');
 
   if (studyMode === 'block') {
     const ctxLines = getBlockContext(c);
@@ -717,7 +715,7 @@ function showDone() {
   const p     = loadProgress();
   const known = Object.values(p).filter(v => v.status === 'known').length;
   document.getElementById('done-sub').textContent =
-    `${reviewed} couplet${reviewed !== 1 ? 's' : ''} reviewed.\n${known.toLocaleString()} of ${couplets.length.toLocaleString()} couplets known.`;
+    `${reviewed} line pair${reviewed !== 1 ? 's' : ''} reviewed.\n${known.toLocaleString()} of ${couplets.length.toLocaleString()} pairs known.`;
 }
 
 function restart() {
