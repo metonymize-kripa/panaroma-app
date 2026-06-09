@@ -90,8 +90,48 @@
       transition: width 0.4s ease;
     }
 
+    /* ── Controls strip ── */
+    .controls-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 8px;
+    }
+
+    .seg-ctrl {
+      display: flex;
+      background: rgba(0,0,0,0.06);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .seg-btn {
+      padding: 5px 11px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+      color: var(--text-secondary);
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+    }
+
+    .seg-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
     /* ── Main ── */
-    /* Fixed 3-zone layout: card zone grows, buttons stay pinned */
     .main {
       flex: 1;
       display: flex;
@@ -108,6 +148,7 @@
       justify-content: center;
       padding: 20px 16px 12px;
       min-height: 0;
+      overflow-y: auto;
     }
 
     .card {
@@ -116,7 +157,7 @@
       box-shadow: 0 4px 24px rgba(0,0,0,0.09);
       width: 100%;
       max-width: 560px;
-      padding: 32px 28px 28px;
+      padding: 28px 28px 24px;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
@@ -128,21 +169,61 @@
       text-transform: uppercase;
       letter-spacing: 0.7px;
       color: var(--text-secondary);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
+    /* ── Context lines (block mode) ── */
+    .card-context {
+      display: none;
+      margin-bottom: 0;
+    }
+
+    .card-context.has-content {
+      display: block;
+      margin-bottom: 0;
+    }
+
+    .ctx-line {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 18px;
+      line-height: 1.65;
+      color: var(--text-secondary);
+    }
+
+    /* Spacing between stanza groups in context */
+    .ctx-break {
+      height: 0.85em;
+    }
+
+    /* ── Prompt line ── */
     .card-line1 {
       font-family: "Georgia", "Times New Roman", serif;
-      font-size: 20px;
-      line-height: 1.55;
+      font-size: 18px;
+      line-height: 1.65;
       color: var(--text);
-      margin-bottom: 8px;
     }
 
+    /* Extra top margin only when context is present */
+    .card-context.has-content + .card-line1 {
+      /* no extra margin — flows as natural next line */
+    }
+
+    /* Spacer between context block and prompt in block mode */
+    .card-prompt-spacer {
+      display: none;
+      height: 0;
+    }
+
+    .card-prompt-spacer.visible {
+      display: block;
+      height: 0.85em; /* one blank line = stanza break before prompt */
+    }
+
+    /* ── Answer line ── */
     .card-line2 {
       font-family: "Georgia", "Times New Roman", serif;
-      font-size: 20px;
-      line-height: 1.55;
+      font-size: 18px;
+      line-height: 1.65;
       color: var(--text);
       opacity: 0;
       transform: translateY(4px);
@@ -158,7 +239,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      margin: 18px 0 6px;
+      margin: 14px 0 4px;
       transition: opacity 0.2s;
     }
 
@@ -178,7 +259,7 @@
 
     /* Poem attribution (revealed) */
     .card-attr {
-      margin-top: 18px;
+      margin-top: 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -210,7 +291,7 @@
       flex-shrink: 0;
       padding: 8px 16px 24px;
       background: var(--bg);
-      display: none; /* hidden until card revealed */
+      display: none;
     }
 
     .rating-zone.visible { display: block; }
@@ -340,12 +421,31 @@
   <div class="progress-fill" id="prog-fill" style="width:0%"></div>
 </div>
 
+<!-- ── Settings controls ── -->
+<div class="controls-strip" id="controls-strip">
+  <div class="seg-ctrl" id="mode-ctrl">
+    <button class="seg-btn active" data-val="pair" onclick="setMode('pair')">Line pair</button>
+    <button class="seg-btn" data-val="block" onclick="setMode('block')">Block</button>
+  </div>
+  <div class="seg-ctrl" id="dir-ctrl">
+    <button class="seg-btn active" data-val="fwd" onclick="setDir('fwd')">→ 2nd line</button>
+    <button class="seg-btn" data-val="rev" onclick="setDir('rev')">← 1st line</button>
+  </div>
+</div>
+
 <div class="main" id="main">
 
   <!-- ── Study view ── -->
   <div class="card-zone" id="card-zone">
     <div class="card" id="card" onclick="revealCard()">
       <div class="card-tag" id="card-tag">New</div>
+
+      <!-- Block mode context lines -->
+      <div class="card-context" id="card-context"></div>
+
+      <!-- Spacer between stanza context and prompt (block mode with stanza break) -->
+      <div class="card-prompt-spacer" id="card-prompt-spacer"></div>
+
       <div class="card-line1" id="card-line1"></div>
       <div class="card-line2" id="card-line2"></div>
 
@@ -391,19 +491,63 @@
 </div>
 
 <script>
-const COUPLET_KEY = 'panorama_couplets_v1';
-const params = new URLSearchParams(location.search);
-const browseAll = params.get('mode') === 'all';
+const COUPLET_KEY  = 'panorama_couplets_v1';
+const SETTINGS_KEY = 'panorama_study_settings_v1';
+const params       = new URLSearchParams(location.search);
+const browseAll    = params.get('mode') === 'all';
 const specificPoem = params.get('poem');
 
-let couplets = [];
-let queue = [];
+let couplets  = [];
+let poems     = {};   // poemId -> lines[]
+let queue     = [];
 let againQueue = [];
-let idx = 0;
-let reviewed = 0;
-let revealed = false;
-let progress = {};
+let idx       = 0;
+let reviewed  = 0;
+let revealed  = false;
+let progress  = {};
 
+// ── Settings ──────────────────────────────────
+let studyMode = 'pair'; // 'pair' | 'block'
+let lineDir   = 'fwd';  // 'fwd' (show line1 → reveal line2) | 'rev' (show line2 → reveal line1)
+
+function loadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {};
+    studyMode = s.mode || 'pair';
+    lineDir   = s.dir  || 'fwd';
+  } catch {}
+  updateSettingsUI();
+}
+
+function saveSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify({ mode: studyMode, dir: lineDir }));
+}
+
+function setMode(m) {
+  studyMode = m;
+  saveSettings();
+  updateSettingsUI();
+  if (!revealed) renderCard();
+}
+
+function setDir(d) {
+  lineDir = d;
+  saveSettings();
+  updateSettingsUI();
+  if (!revealed) renderCard();
+}
+
+function updateSettingsUI() {
+  document.querySelectorAll('#mode-ctrl .seg-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.val === studyMode));
+  document.querySelectorAll('#dir-ctrl .seg-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.val === lineDir));
+  // Flip toggle is redundant in block mode (always fwd), but keep it active for pair mode
+  document.getElementById('dir-ctrl').style.opacity = studyMode === 'block' ? '0.4' : '1';
+  document.getElementById('dir-ctrl').style.pointerEvents = studyMode === 'block' ? 'none' : '';
+}
+
+// ── Progress ──────────────────────────────────
 function loadProgress() {
   try { return JSON.parse(localStorage.getItem(COUPLET_KEY)) || {}; } catch { return {}; }
 }
@@ -434,31 +578,68 @@ function computeNext(id, rating) {
   }
 }
 
-async function init() {
-  const data = await fetch('couplets.json').then(r => r.json());
-  couplets = data;
-  progress = loadProgress();
+// ── Block mode: stanza context ─────────────────
+// Returns up to 4 preceding poem lines for context.
+// Uses coupletIndex * 2 to locate lines in the poem.
+function getBlockContext(couplet) {
+  const lines = poems[couplet.poemId];
+  if (!lines) return [];
 
-  if (specificPoem) {
-    queue = couplets.filter(c => c.poemId === specificPoem);
-    const title = queue[0]?.poemTitle || 'Poem';
-    document.getElementById('h-title').textContent = title;
-  } else if (browseAll) {
-    queue = shuffle([...couplets]);
-    document.getElementById('h-title').textContent = 'All poems';
-  } else {
-    queue = couplets.filter(c => isDue(c.id));
-    queue.sort((a, b) => {
-      const order = { learning: 0, new: 1, known: 2 };
-      return (order[getStatus(a.id)] || 1) - (order[getStatus(b.id)] || 1);
-    });
-    document.getElementById('h-title').textContent = 'Due today';
-  }
+  const promptLineIdx = couplet.coupletIndex * 2; // line1 is at this index in the poem
+  if (promptLineIdx === 0) return [];             // no preceding lines
 
-  if (queue.length === 0) { showDone(); return; }
-  showCard();
+  const start = Math.max(0, promptLineIdx - 4);
+  return lines.slice(start, promptLineIdx);       // up to 4 lines before line1
 }
 
+// ── Rendering ─────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderCard() {
+  const c = current();
+  if (!c) return;
+
+  const promptLine = lineDir === 'fwd' ? c.line1 : c.line2;
+  const answerLine = lineDir === 'fwd' ? c.line2 : c.line1;
+
+  // Reset answer
+  const line2El = document.getElementById('card-line2');
+  line2El.textContent = answerLine;
+  line2El.classList.remove('revealed');
+  document.getElementById('card-divider').classList.remove('hidden');
+  document.getElementById('card-attr').classList.remove('revealed');
+  document.getElementById('rating-zone').classList.remove('visible');
+
+  // Prompt line
+  document.getElementById('card-line1').textContent = promptLine;
+
+  // Context (block mode only)
+  const ctxEl     = document.getElementById('card-context');
+  const spacerEl  = document.getElementById('card-prompt-spacer');
+
+  if (studyMode === 'block') {
+    const ctxLines = getBlockContext(c);
+    if (ctxLines.length > 0) {
+      ctxEl.innerHTML = ctxLines.map(l => `<div class="ctx-line">${escHtml(l)}</div>`).join('');
+      ctxEl.classList.add('has-content');
+      // Show stanza-break spacer if the context doesn't immediately precede prompt
+      // (i.e. there was a gap in the poem — not detectable without \n\n data, so always show spacer)
+      spacerEl.classList.remove('visible');
+    } else {
+      ctxEl.innerHTML = '';
+      ctxEl.classList.remove('has-content');
+      spacerEl.classList.remove('visible');
+    }
+  } else {
+    ctxEl.innerHTML = '';
+    ctxEl.classList.remove('has-content');
+    spacerEl.classList.remove('visible');
+  }
+}
+
+// ── Card flow ─────────────────────────────────
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -469,7 +650,7 @@ function shuffle(arr) {
 
 function current() {
   if (idx < queue.length) return queue[idx];
-  if (againQueue.length) return againQueue[0];
+  if (againQueue.length)  return againQueue[0];
   return null;
 }
 
@@ -477,19 +658,13 @@ function showCard() {
   const c = current();
   if (!c) { showDone(); return; }
 
-  const done = reviewed;
+  const done      = reviewed;
   const remaining = (queue.length - Math.min(idx, queue.length)) + againQueue.length;
-  const total = done + remaining;
+  const total     = done + remaining;
   document.getElementById('prog-fill').style.width = total > 0 ? Math.round(done / total * 100) + '%' : '0%';
   document.getElementById('h-sub').textContent = `${done + 1} of ${total}`;
 
   revealed = false;
-  document.getElementById('card-line1').textContent = c.line1;
-  document.getElementById('card-line2').textContent = c.line2;
-  document.getElementById('card-line2').classList.remove('revealed');
-  document.getElementById('card-divider').classList.remove('hidden');
-  document.getElementById('card-attr').classList.remove('revealed');
-  document.getElementById('rating-zone').classList.remove('visible');
 
   const status = getStatus(c.id);
   document.getElementById('card-tag').textContent =
@@ -497,6 +672,8 @@ function showCard() {
 
   document.getElementById('attr-text').textContent = `${c.poemTitle} — ${c.author}`;
   document.getElementById('attr-link').href = `poem.html?id=${encodeURIComponent(c.poemId)}`;
+
+  renderCard();
 }
 
 function revealCard() {
@@ -529,14 +706,15 @@ function rate(rating) {
 }
 
 function showDone() {
-  document.getElementById('card-zone').style.display = 'none';
-  document.getElementById('rating-zone').style.display = 'none';
+  document.getElementById('card-zone').style.display    = 'none';
+  document.getElementById('rating-zone').style.display  = 'none';
+  document.getElementById('controls-strip').style.display = 'none';
   document.getElementById('done-screen').classList.add('visible');
   document.getElementById('h-title').textContent = 'Done';
-  document.getElementById('h-sub').textContent = '';
+  document.getElementById('h-sub').textContent   = '';
   document.getElementById('prog-fill').style.width = '100%';
 
-  const p = loadProgress();
+  const p     = loadProgress();
   const known = Object.values(p).filter(v => v.status === 'known').length;
   document.getElementById('done-sub').textContent =
     `${reviewed} couplet${reviewed !== 1 ? 's' : ''} reviewed.\n${known.toLocaleString()} of ${couplets.length.toLocaleString()} couplets known.`;
@@ -554,8 +732,47 @@ function restart() {
     if (!queue.length) queue = shuffle([...couplets]);
   }
   document.getElementById('done-screen').classList.remove('visible');
-  document.getElementById('card-zone').style.display = '';
-  document.getElementById('rating-zone').style.display = '';
+  document.getElementById('card-zone').style.display    = '';
+  document.getElementById('rating-zone').style.display  = '';
+  document.getElementById('controls-strip').style.display = '';
+  showCard();
+}
+
+// ── Init ──────────────────────────────────────
+async function init() {
+  loadSettings();
+
+  // Load both data files in parallel
+  const [coupletsData, poemsData] = await Promise.all([
+    fetch('couplets.json').then(r => r.json()),
+    fetch('poems.json').then(r => r.json()).catch(() => [])
+  ]);
+
+  couplets = coupletsData;
+  progress = loadProgress();
+
+  // Build poem lines lookup
+  for (const p of poemsData) {
+    poems[p.id] = p.text.split('\n');
+  }
+
+  if (specificPoem) {
+    queue = couplets.filter(c => c.poemId === specificPoem);
+    const title = queue[0]?.poemTitle || 'Poem';
+    document.getElementById('h-title').textContent = title;
+  } else if (browseAll) {
+    queue = shuffle([...couplets]);
+    document.getElementById('h-title').textContent = 'All poems';
+  } else {
+    queue = couplets.filter(c => isDue(c.id));
+    queue.sort((a, b) => {
+      const order = { learning: 0, new: 1, known: 2 };
+      return (order[getStatus(a.id)] || 1) - (order[getStatus(b.id)] || 1);
+    });
+    document.getElementById('h-title').textContent = 'Due today';
+  }
+
+  if (queue.length === 0) { showDone(); return; }
   showCard();
 }
 
