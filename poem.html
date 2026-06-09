@@ -208,7 +208,7 @@
     <div class="status-pill" id="status-pill">—</div>
   </div>
 
-  <a href="study.html" class="study-btn" id="study-btn">Study couplets from this poem</a>
+  <a href="study.html" class="study-btn" id="study-btn">Study this poem</a>
 
   <div style="padding: 20px 4px 8px; text-align:center;">
     <p style="font-size:12px;color:var(--text-secondary);line-height:1.7;">
@@ -221,7 +221,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'panorama_v1';
+const STORAGE_KEY = 'panorama_couplets_v1';
 const params = new URLSearchParams(location.search);
 const poemId = params.get('id');
 
@@ -256,11 +256,21 @@ async function init() {
   document.getElementById('poem-author').textContent = poem.author;
   document.getElementById('poem-text').textContent = poem.text;
 
-  // Status
-  const progress = loadProgress();
-  const card = progress[poem.id];
-  const status = card ? card.status : 'new';
-  const reviews = card ? (card.reviews || 0) : 0;
+  // Status — aggregate across all pairs for this poem
+  const allProgress = loadProgress();
+  const prefix = poem.id + '-c';
+  const pairKeys = Object.keys(allProgress).filter(k => k.startsWith(prefix));
+  const totalReviews = pairKeys.reduce((s, k) => s + (allProgress[k].reviews || 0), 0);
+  const knownCount  = pairKeys.filter(k => allProgress[k].status === 'known').length;
+  const learningCount = pairKeys.filter(k => allProgress[k].status === 'learning').length;
+
+  // Determine overall status
+  let status = 'new';
+  if (pairKeys.length > 0) {
+    if (knownCount === pairKeys.length) status = 'known';
+    else if (learningCount > 0 || knownCount > 0) status = 'learning';
+    else status = 'new';
+  }
 
   const pill = document.getElementById('status-pill');
   pill.textContent = status.charAt(0).toUpperCase() + status.slice(1);
@@ -269,15 +279,9 @@ async function init() {
   const info = document.getElementById('status-info');
   if (status === 'new') {
     info.textContent = 'You haven\'t studied this poem yet.';
-  } else if (status === 'learning') {
-    info.textContent = `Reviewed ${reviews} time${reviews !== 1 ? 's' : ''}.`;
   } else {
-    const next = new Date(card.nextReview);
-    const daysUntil = Math.ceil((card.nextReview - Date.now()) / 86400000);
-    const nextStr = daysUntil <= 0 ? 'today' :
-                    daysUntil === 1 ? 'tomorrow' :
-                    `in ${daysUntil} days`;
-    info.textContent = `Reviewed ${reviews} time${reviews !== 1 ? 's' : ''}. Due ${nextStr}.`;
+    const pct = pairKeys.length > 0 ? Math.round(knownCount / pairKeys.length * 100) : 0;
+    info.textContent = `${knownCount} of ${pairKeys.length} pairs known (${pct}%). ${totalReviews} review${totalReviews !== 1 ? 's' : ''} total.`;
   }
 
   document.getElementById('study-btn').href = `study.html?poem=${encodeURIComponent(poem.id)}&mode=poem`;
