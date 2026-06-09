@@ -300,42 +300,20 @@
       font-size: 14px;
     }
 
+    /* ── Intro hint ── */
+    .intro-hint {
+      padding: 0 20px 14px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      transition: opacity 0.5s ease;
+    }
+
+    .intro-hint.fade-out { opacity: 0; }
+
     /* ── CTA ── */
     .cta-section {
       padding: 20px 16px 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .btn-study {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 16px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 16px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      text-decoration: none;
-      transition: opacity 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .btn-study:active { opacity: 0.85; }
-    .btn-study.muted { background: var(--surface); color: var(--text-secondary); box-shadow: var(--shadow); font-size: 15px; font-weight: 500; }
-
-    .due-chip {
-      background: rgba(255,255,255,0.25);
-      border-radius: 10px;
-      padding: 2px 8px;
-      font-size: 13px;
-      font-weight: 600;
     }
 
     .btn-browse {
@@ -415,6 +393,10 @@
   <a class="progress-pill" href="library.html" id="progress-pill">— / — known</a>
 </header>
 
+<div class="intro-hint" id="intro-hint">
+  A study companion for poems — tap any line to reveal the next.
+</div>
+
 <!-- Featured couplet -->
 <div class="hero">
   <div class="couplet-card" id="couplet-card" onclick="handleCardTap(event)">
@@ -457,10 +439,6 @@
 
 <!-- CTAs -->
 <div class="cta-section">
-  <a href="study.html" class="btn-study" id="btn-study">
-    Study due couplets
-    <span class="due-chip" id="due-chip" style="display:none">0</span>
-  </a>
   <a href="library.html" class="btn-browse">Browse all poems</a>
 </div>
 
@@ -488,14 +466,6 @@ function loadCoupletProgress() {
 
 function getStatus(progress, id) {
   return (progress[id] && progress[id].status) || 'new';
-}
-
-function isDue(progress, id) {
-  const c = progress[id];
-  if (!c || c.status === 'new') return true;
-  if (c.status === 'learning') return true;
-  if (c.status === 'known') return Date.now() >= (c.nextReview || 0);
-  return true;
 }
 
 function pickCouplet(forceNew) {
@@ -551,12 +521,7 @@ async function init() {
   const progress = loadCoupletProgress();
 
   const counts = { new: 0, learning: 0, known: 0 };
-  let due = 0;
-  couplets.forEach(c => {
-    const s = getStatus(progress, c.id);
-    counts[s]++;
-    if (isDue(progress, c.id)) due++;
-  });
+  couplets.forEach(c => { counts[getStatus(progress, c.id)]++; });
 
   document.getElementById('stat-new').textContent = counts.new;
   document.getElementById('stat-learning').textContent = counts.learning;
@@ -565,22 +530,27 @@ async function init() {
   // Header pill — show poem-level known count
   const poemProgress = (() => { try { return JSON.parse(localStorage.getItem(POEM_KEY)) || {}; } catch { return {}; }})();
   const poemsKnown = poems.filter(p => poemProgress[p.id] && poemProgress[p.id].status === 'known').length;
-  const pill = document.getElementById('progress-pill');
-  pill.innerHTML = `<span>${poemsKnown}</span> / ${poems.length}`;
-
-  // Due chip
-  if (due > 0) {
-    const chip = document.getElementById('due-chip');
-    chip.textContent = due.toLocaleString();
-    chip.style.display = '';
-  } else {
-    document.getElementById('btn-study').textContent = 'All caught up ✓';
-    document.getElementById('btn-study').classList.add('muted');
-    document.getElementById('btn-study').style.pointerEvents = 'none';
-  }
+  document.getElementById('progress-pill').innerHTML = `<span>${poemsKnown}</span> / ${poems.length}`;
 
   pickCouplet();
+  initIntro();
   initSearch();
+}
+
+function initIntro() {
+  const hint = document.getElementById('intro-hint');
+  if (localStorage.getItem('panorama_intro_seen')) {
+    hint.style.display = 'none';
+    return;
+  }
+  // Dismiss on first card tap
+  const dismiss = () => {
+    hint.classList.add('fade-out');
+    setTimeout(() => { hint.style.display = 'none'; }, 500);
+    localStorage.setItem('panorama_intro_seen', '1');
+    document.getElementById('couplet-card').removeEventListener('click', dismiss);
+  };
+  document.getElementById('couplet-card').addEventListener('click', dismiss);
 }
 
 function initSearch() {
