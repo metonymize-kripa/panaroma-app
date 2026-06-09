@@ -233,13 +233,10 @@
       text-overflow: ellipsis;
     }
 
-    .study-link {
-      font-size: 13px;
-      color: var(--accent);
-      text-decoration: none;
-      padding: 6px 4px 6px 8px;
+    .chevron {
+      font-size: 16px;
+      color: var(--border);
       flex-shrink: 0;
-      -webkit-tap-highlight-color: transparent;
     }
 
     mark {
@@ -401,7 +398,7 @@ function render() {
             ? `<div class="poem-match">"${highlight(esc(match), query)}"</div>`
             : `<div class="poem-author">${esc(p.author)}</div>`}
         </div>
-        <a class="study-link" href="study.html?poem=${enc(p.id)}" onclick="event.stopPropagation()" title="Study couplets">Study</a>
+        <span class="chevron">›</span>
       </a>
     `;
   }).join('')}</div>`;
