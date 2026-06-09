@@ -188,6 +188,7 @@
       font-size: 18px;
       line-height: 1.65;
       color: var(--text-secondary);
+      white-space: pre-wrap;
     }
 
     /* Spacing between stanza groups in context */
@@ -207,6 +208,7 @@
     /* In block mode the prompt flows directly from context — remove extra gap */
     .card.block-mode .card-line1 {
       margin-bottom: 0;
+      white-space: pre-wrap;
     }
 
     /* Spacer between context block and prompt — unused now, kept for future */
@@ -457,7 +459,7 @@
 
   <!-- ── Rating buttons — always at bottom ── -->
   <div class="rating-zone" id="rating-zone">
-    <div class="rating-label">How well did you know the next line?</div>
+    <div class="rating-label" id="rating-label">How well did you know the next line?</div>
     <div class="rating-btns">
       <button class="rate-btn again" onclick="rate('again')">
         Again
@@ -491,7 +493,9 @@ const browseAll    = params.get('mode') === 'all';
 const specificPoem = params.get('poem');
 
 let couplets  = [];
-let poems     = {};   // poemId -> lines[]
+let poems     = {};     // poemId -> lines[] (split on \n)
+let stanzas   = {};     // poemId -> string[] (one entry per stanza, split on \n\n)
+let poemsMeta = {};     // poemId -> { title, author }
 let queue     = [];
 let againQueue = [];
 let idx       = 0;
@@ -520,7 +524,11 @@ function setMode(m) {
   studyMode = m;
   saveSettings();
   updateSettingsUI();
-  if (!revealed) renderCard();
+  // Rebuild queue for the new mode and restart from scratch
+  idx = 0; reviewed = 0; againQueue = [];
+  queue = buildQueue();
+  revealed = false;
+  showCard();
 }
 
 function setDir(d) {
@@ -571,20 +579,24 @@ function computeNext(id, rating) {
   }
 }
 
-// ── Block mode: stanza context ─────────────────
-// Returns lines from the start of the current stanza up to (not including) the prompt line.
-// Assumes 4-line stanzas (2 pairs each). This prevents context bleeding across stanza boundaries
-// since poems.json has no \n\n separators.
-function getBlockContext(couplet) {
-  const lines = poems[couplet.poemId];
-  if (!lines) return [];
-
-  const promptLineIdx = couplet.coupletIndex * 2;
-  // Stanza start: every 2 pairs = 4 lines
-  const stanzaStart = Math.floor(couplet.coupletIndex / 2) * 4;
-
-  if (promptLineIdx === stanzaStart) return []; // first pair in stanza — no preceding context
-  return lines.slice(stanzaStart, promptLineIdx);
+// ── Block mode: stanza queue ───────────────────
+// One card per stanza. Progress keyed on `${poemId}-stanza-${i}`.
+function buildStanzaQueue(poemFilter) {
+  const result = [];
+  for (const poemId of Object.keys(stanzas)) {
+    if (poemFilter && poemId !== poemFilter) continue;
+    stanzas[poemId].forEach((stanzaText, i) => {
+      result.push({
+        type: 'stanza',
+        id: `${poemId}-stanza-${i}`,
+        poemId,
+        poemTitle: poemsMeta[poemId]?.title || '',
+        author:    poemsMeta[poemId]?.author || '',
+        stanzaIndex: i
+      });
+    });
+  }
+  return result;
 }
 
 // ── Rendering ─────────────────────────────────
@@ -596,44 +608,54 @@ function renderCard() {
   const c = current();
   if (!c) return;
 
-  const promptLine = lineDir === 'fwd' ? c.line1 : c.line2;
-  const answerLine = lineDir === 'fwd' ? c.line2 : c.line1;
-
-  // Reset answer
-  const line2El = document.getElementById('card-line2');
-  line2El.textContent = answerLine;
-  line2El.classList.remove('revealed');
-  document.getElementById('card-divider').classList.remove('hidden');
+  // Reset shared state
   document.getElementById('card-attr').classList.remove('revealed');
   document.getElementById('rating-zone').classList.remove('visible');
 
-  // Prompt line
-  document.getElementById('card-line1').textContent = promptLine;
+  if (studyMode !== 'block') {
+    const promptLine = lineDir === 'fwd' ? c.line1 : c.line2;
+    const answerLine = lineDir === 'fwd' ? c.line2 : c.line1;
+    const line2El = document.getElementById('card-line2');
+    line2El.textContent = answerLine;
+    line2El.classList.remove('revealed');
+    document.getElementById('card-divider').classList.remove('hidden');
+    document.getElementById('card-line1').textContent = promptLine;
+  }
 
-  // Context (block mode only)
-  const cardEl    = document.getElementById('card');
-  const ctxEl     = document.getElementById('card-context');
-  const spacerEl  = document.getElementById('card-prompt-spacer');
+  // Context + body (block mode shows whole stanza; pair mode shows no context)
+  const cardEl   = document.getElementById('card');
+  const ctxEl    = document.getElementById('card-context');
+  const spacerEl = document.getElementById('card-prompt-spacer');
 
   cardEl.classList.toggle('block-mode', studyMode === 'block');
 
   if (studyMode === 'block') {
-    const ctxLines = getBlockContext(c);
-    if (ctxLines.length > 0) {
-      ctxEl.innerHTML = ctxLines.map(l => `<div class="ctx-line">${escHtml(l)}</div>`).join('');
+    // Show preceding stanza as context (gray)
+    const prevStanza = c.stanzaIndex > 0 ? stanzas[c.poemId]?.[c.stanzaIndex - 1] : null;
+    if (prevStanza) {
+      ctxEl.innerHTML = prevStanza.split('\n')
+        .map(l => `<div class="ctx-line">${escHtml(l)}</div>`)
+        .join('');
       ctxEl.classList.add('has-content');
-      // Show stanza-break spacer if the context doesn't immediately precede prompt
-      // (i.e. there was a gap in the poem — not detectable without \n\n data, so always show spacer)
-      spacerEl.classList.remove('visible');
+      // Blank-line spacer between context stanza and current stanza
+      spacerEl.style.display = 'block';
+      spacerEl.style.height  = '0.85em';
     } else {
       ctxEl.innerHTML = '';
       ctxEl.classList.remove('has-content');
-      spacerEl.classList.remove('visible');
+      spacerEl.style.display = 'none';
     }
+    // Show entire current stanza as the prompt
+    const stanzaText = stanzas[c.poemId]?.[c.stanzaIndex] || '';
+    document.getElementById('card-line1').textContent = stanzaText;
+    // Nothing to reveal — hide answer line and divider
+    document.getElementById('card-line2').textContent = '';
+    document.getElementById('card-line2').classList.add('revealed');
+    document.getElementById('card-divider').classList.add('hidden');
   } else {
     ctxEl.innerHTML = '';
     ctxEl.classList.remove('has-content');
-    spacerEl.classList.remove('visible');
+    spacerEl.style.display = 'none';
   }
 }
 
@@ -677,10 +699,14 @@ function showCard() {
 function revealCard() {
   if (revealed) return;
   revealed = true;
-  document.getElementById('card-line2').classList.add('revealed');
-  document.getElementById('card-divider').classList.add('hidden');
+  if (studyMode !== 'block') {
+    document.getElementById('card-line2').classList.add('revealed');
+    document.getElementById('card-divider').classList.add('hidden');
+  }
   document.getElementById('card-attr').classList.add('revealed');
   document.getElementById('rating-zone').classList.add('visible');
+  document.getElementById('rating-label').textContent =
+    studyMode === 'block' ? 'How well did you know this stanza?' : 'How well did you know the next line?';
 }
 
 function rate(rating) {
@@ -718,17 +744,31 @@ function showDone() {
     `${reviewed} line pair${reviewed !== 1 ? 's' : ''} reviewed.\n${known.toLocaleString()} of ${couplets.length.toLocaleString()} pairs known.`;
 }
 
+function buildQueue() {
+  if (studyMode === 'block') {
+    const all = buildStanzaQueue(specificPoem || null);
+    if (browseAll || specificPoem) return shuffle(all);
+    const due = all.filter(c => isDue(c.id));
+    return due.length ? due : shuffle(all);
+  }
+  // pair mode
+  const src = specificPoem
+    ? couplets.filter(c => c.poemId === specificPoem)
+    : [...couplets];
+  if (browseAll || specificPoem) return shuffle(src);
+  const due = src.filter(c => isDue(c.id));
+  if (!due.length) return shuffle(src);
+  due.sort((a, b) => {
+    const order = { learning: 0, new: 1, known: 2 };
+    return (order[getStatus(a.id)] || 1) - (order[getStatus(b.id)] || 1);
+  });
+  return due;
+}
+
 function restart() {
   progress = loadProgress();
   idx = 0; reviewed = 0; againQueue = [];
-  if (browseAll || specificPoem) {
-    queue = specificPoem
-      ? shuffle(couplets.filter(c => c.poemId === specificPoem))
-      : shuffle([...couplets]);
-  } else {
-    queue = couplets.filter(c => isDue(c.id));
-    if (!queue.length) queue = shuffle([...couplets]);
-  }
+  queue = buildQueue();
   document.getElementById('done-screen').classList.remove('visible');
   document.getElementById('card-zone').style.display    = '';
   document.getElementById('rating-zone').style.display  = '';
@@ -749,26 +789,23 @@ async function init() {
   couplets = coupletsData;
   progress = loadProgress();
 
-  // Build poem lines lookup
+  // Build poem lookups
   for (const p of poemsData) {
-    poems[p.id] = p.text.split('\n');
+    poems[p.id]     = p.text.split('\n');
+    stanzas[p.id]   = p.text.split('\n\n').filter(s => s.trim());
+    poemsMeta[p.id] = { title: p.title, author: p.author };
   }
 
   if (specificPoem) {
-    queue = couplets.filter(c => c.poemId === specificPoem);
-    const title = queue[0]?.poemTitle || 'Poem';
+    const title = couplets.find(c => c.poemId === specificPoem)?.poemTitle
+                  || poemsMeta[specificPoem]?.title || 'Poem';
     document.getElementById('h-title').textContent = title;
   } else if (browseAll) {
-    queue = shuffle([...couplets]);
     document.getElementById('h-title').textContent = 'All poems';
   } else {
-    queue = couplets.filter(c => isDue(c.id));
-    queue.sort((a, b) => {
-      const order = { learning: 0, new: 1, known: 2 };
-      return (order[getStatus(a.id)] || 1) - (order[getStatus(b.id)] || 1);
-    });
     document.getElementById('h-title').textContent = 'Due today';
   }
+  queue = buildQueue();
 
   if (queue.length === 0) { showDone(); return; }
   showCard();
