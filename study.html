@@ -629,33 +629,21 @@ function renderCard() {
 
   cardEl.classList.toggle('block-mode', studyMode === 'block');
 
+  // No context panel in either mode
+  ctxEl.innerHTML = '';
+  ctxEl.classList.remove('has-content');
+  spacerEl.style.display = 'none';
+
   if (studyMode === 'block') {
-    // Show preceding stanza as context (gray)
-    const prevStanza = c.stanzaIndex > 0 ? stanzas[c.poemId]?.[c.stanzaIndex - 1] : null;
-    if (prevStanza) {
-      ctxEl.innerHTML = prevStanza.split('\n')
-        .map(l => `<div class="ctx-line">${escHtml(l)}</div>`)
-        .join('');
-      ctxEl.classList.add('has-content');
-      // Blank-line spacer between context stanza and current stanza
-      spacerEl.style.display = 'block';
-      spacerEl.style.height  = '0.85em';
-    } else {
-      ctxEl.innerHTML = '';
-      ctxEl.classList.remove('has-content');
-      spacerEl.style.display = 'none';
-    }
-    // Show entire current stanza as the prompt
+    // Split stanza in half: show top, hide bottom until tapped
     const stanzaText = stanzas[c.poemId]?.[c.stanzaIndex] || '';
-    document.getElementById('card-line1').textContent = stanzaText;
-    // Nothing to reveal — hide answer line and divider
-    document.getElementById('card-line2').textContent = '';
-    document.getElementById('card-line2').classList.add('revealed');
-    document.getElementById('card-divider').classList.add('hidden');
-  } else {
-    ctxEl.innerHTML = '';
-    ctxEl.classList.remove('has-content');
-    spacerEl.style.display = 'none';
+    const lines = stanzaText.split('\n');
+    const half  = Math.ceil(lines.length / 2);
+    document.getElementById('card-line1').textContent = lines.slice(0, half).join('\n');
+    const line2El = document.getElementById('card-line2');
+    line2El.textContent = lines.slice(half).join('\n');
+    line2El.classList.remove('revealed');
+    document.getElementById('card-divider').classList.remove('hidden');
   }
 }
 
@@ -699,10 +687,8 @@ function showCard() {
 function revealCard() {
   if (revealed) return;
   revealed = true;
-  if (studyMode !== 'block') {
-    document.getElementById('card-line2').classList.add('revealed');
-    document.getElementById('card-divider').classList.add('hidden');
-  }
+  document.getElementById('card-line2').classList.add('revealed');
+  document.getElementById('card-divider').classList.add('hidden');
   document.getElementById('card-attr').classList.add('revealed');
   document.getElementById('rating-zone').classList.add('visible');
   document.getElementById('rating-label').textContent =
