@@ -79,19 +79,35 @@ def poem_body(raw: str) -> str:
 def update_json(pdf_path: str, json_path: str) -> None:
     """Re-extract every poem page and update the 'text' field in poems.json."""
     poems = json.loads(Path(json_path).read_text(encoding="utf-8"))
-    page_map = {p["page"]: i for i, p in enumerate(poems)}
 
     with pdfplumber.open(pdf_path) as pdf:
         total = len(pdf.pages)
         updated = 0
-        for page_num, idx in sorted(page_map.items()):
-            if not 1 <= page_num <= total:
-                print(f"  skip: page {page_num} out of range (1–{total})")
+        for idx, poem in enumerate(poems):
+            page_start = poem["page"]
+            page_end   = poem.get("page_end", page_start)
+            if not 1 <= page_start <= total:
+                print(f"  skip: page {page_start} out of range (1–{total})")
                 continue
-            raw  = extract_page(pdf.pages[page_num - 1])
-            body = poem_body(raw)
+
+            if page_start == page_end:
+                raw  = extract_page(pdf.pages[page_start - 1])
+                body = poem_body(raw)
+            else:
+                # First page: strip title/author header
+                raw  = extract_page(pdf.pages[page_start - 1])
+                body = poem_body(raw)
+                # Continuation pages: use raw text directly (no header to strip)
+                for pn in range(page_start + 1, page_end + 1):
+                    if not 1 <= pn <= total:
+                        print(f"  warn: continuation page {pn} out of range")
+                        break
+                    cont = extract_page(pdf.pages[pn - 1])
+                    if cont:
+                        body = body + "\n\n" + cont if body else cont
+
             if not body:
-                print(f"  warn: page {page_num} — no body text extracted")
+                print(f"  warn: page {page_start} — no body text extracted")
                 continue
             poems[idx]["text"] = body
             updated += 1
